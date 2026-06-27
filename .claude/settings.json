@@ -1,0 +1,41 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/guard.py",
+            "timeout": 30,
+            "statusMessage": "Bielik-Guard: checking prompt..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/pre_tool_hook.py",
+            "timeout": 15,
+            "statusMessage": "PII-Guard: checking file..."
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/pre_tool_hook.py",
+            "timeout": 10,
+            "statusMessage": "PII-Guard: checking search path..."
+          }
+        ]
+      }
+    ]
+  }
+}

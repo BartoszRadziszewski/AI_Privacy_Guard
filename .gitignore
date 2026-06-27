@@ -1,0 +1,45 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Environment & secrets
+.env
+.env.*
+*.pem
+*.key
+secrets.*
+*token*.txt
+*-token.txt
+hf_*.txt
+
+# Claude Code — local user settings (contain absolute paths, not for sharing)
+.claude/settings.local.json
+
+# Project-internal files (not for public consumption)
+archiwum/
+dziennik-projektu.md
+architektura-projektu.md
+bielik-guard-project-description.md
+ZADANIE-opcja-B.md
+
+# HuggingFace model cache (large, auto-downloaded)
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo

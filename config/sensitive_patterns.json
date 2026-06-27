@@ -1,0 +1,42 @@
+{
+  "intercepted_tools": ["Read", "Grep"],
+
+  "path_patterns": [
+    "\\.env$",
+    "token.*\\.txt$",
+    "osobow",
+    "kontakt",
+    "email.*account",
+    "transkrypcj",
+    "spotkani",
+    "korespondencj",
+    "struktura.*organizacyj",
+    "pracowni",
+    "credentials",
+    "secret",
+    "password",
+    "\\.pem$",
+    "\\.key$",
+    "lista.*osob",
+    "baza.*klientow",
+    "baza.*pracownikow",
+    "kartoteka",
+    "ewidencj"
+  ],
+
+  "content_peek_patterns": [
+    "@[\\w.-]+\\.[a-z]{2,}",
+    "\\+48[\\d \\-]{9,}",
+    "\\b\\d{10,11}\\b"
+  ],
+
+  "binary_extensions": [
+    ".pdf", ".doc", ".docx", ".xls", ".xlsx",
+    ".ppt", ".pptx", ".odt", ".ods", ".odp"
+  ],
+
+  "text_extensions_with_peek": [
+    ".txt", ".csv", ".xml", ".json", ".md",
+    ".log", ".eml", ".msg", ".html", ".htm"
+  ]
+}
