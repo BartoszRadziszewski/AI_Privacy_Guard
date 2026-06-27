@@ -114,6 +114,70 @@ AI_Privacy_Guard/
 └── LICENSE
 ```
 
+## File guard — how detection works
+
+The `PreToolUse` hook intercepts `Read` and `Grep` tool calls using two detection levels:
+
+### Level 1 — Path pattern matching
+
+The file path (or Grep search path/glob) is checked against `path_patterns` in
+`config/sensitive_patterns.json`. Default patterns include:
+
+| Pattern | Matches |
+|---------|---------|
+| `\.env$` | `.env` files |
+| `spotkani` | meeting notes (spotkanie, spotkania…) |
+| `pracowni` | employee files |
+| `kontakt` | contact lists |
+| `korespondencj` | correspondence |
+| `transkrypcj` | transcripts |
+| `osobow` | personal data files |
+| `credentials`, `secret`, `password` | credentials |
+| `\.pem$`, `\.key$` | certificates and keys |
+| `lista.*osob`, `baza.*klientow` | customer/person databases |
+| `kartoteka`, `ewidencj` | records |
+
+### Level 2 — Content peek (text files only)
+
+If the path passes Level 1, the first 2000 characters of the file are scanned
+against `content_peek_patterns`:
+
+| Pattern | Detects |
+|---------|---------|
+| `@[\w.-]+\.[a-z]{2,}` | email addresses |
+| `\+48[\d \-]{9,}` | Polish phone numbers |
+| `\b\d{10,11}\b` | long digit sequences (PESEL, NIP…) |
+
+### File format handling
+
+| Format | Level 1 | Level 2 | On detection |
+|--------|:-------:|:-------:|--------------|
+| `.txt`, `.csv`, `.xml`, `.md`, `.log`, `.eml` | ✓ | ✓ peek | anonymized content returned to Claude |
+| `.pdf`, `.doc`, `.docx` | ✓ | ✗ (binary) | access blocked with explanation |
+| `.xls`, `.xlsx` | ✓ | ✗ (binary) | access blocked with explanation |
+| `.ppt`, `.pptx`, `.odt`, `.ods`, `.odp` | ✓ | ✗ (binary) | access blocked with explanation |
+| Other text files | ✓ | ✓ peek | anonymized content returned to Claude |
+
+### PII anonymization result
+
+When PII is detected in a **text file**, the hook:
+1. Reads the full file content
+2. Replaces PII with reversible tokens: `[EMAIL_1]`, `[OSOBA_1]`, `[TEL_1]`
+3. Returns the anonymized content to Claude (instead of blocking entirely)
+
+If anonymization finds **no PII** despite a sensitive path match → file passes through (false positive handled gracefully).
+
+### Grep interception
+
+When Claude uses the `Grep` tool, the `path` and `glob` fields are checked against
+`path_patterns`. If the search targets a sensitive directory or file pattern, the
+search is blocked before any content is exposed.
+
+```
+Claude: Grep pattern="email" path="C:\docs\pracownicy"
+  → [PII-Guard] blocked — sensitive path match
+```
+
 ## Safety model
 
 **[speakleash/Bielik-Guard-0.1B-v1.1](https://huggingface.co/speakleash/Bielik-Guard-0.1B-v1.1)**
