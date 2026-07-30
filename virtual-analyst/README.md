@@ -10,7 +10,9 @@ zgodną z ISO/IEC 19510 (BPMN 2.0), ISO/IEC/IEEE 29148 i SBVR — w formatach
 Implementacja powstała według **poprawionej** specyfikacji projektu — patrz:
 
 - [`docs/RECENZJA.md`](docs/RECENZJA.md) — krytyczna recenzja oryginalnego dokumentu projektu,
-- [`docs/PROMPTY_V2.md`](docs/PROMPTY_V2.md) — poprawione prompty (Meta-Prompt, Runtime, Spec-Gen).
+- [`docs/PROMPTY_V2.md`](docs/PROMPTY_V2.md) — poprawione prompty (Meta-Prompt, Runtime, Spec-Gen),
+- [`docs/OPCJE.md`](docs/OPCJE.md) — zaplanowane opcje rozwojowe (m.in. serwerowy STT,
+  streaming LLM→TTS, eksport BPMN XML).
 
 ## Architektura
 
