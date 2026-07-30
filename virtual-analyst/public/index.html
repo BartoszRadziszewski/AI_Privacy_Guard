@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wirtualny Analityk IT / Architekt PIM</title>
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Wirtualny Analityk <span>IT / Architekt PIM</span></h1>
+    <div class="status" id="connection-status" data-state="offline">rozłączony</div>
+  </header>
+
+  <main class="layout">
+    <!-- Panel awatara -->
+    <section class="panel avatar-panel">
+      <video id="avatar-video" autoplay playsinline></video>
+      <audio id="tts-audio"></audio>
+      <div class="avatar-overlay" id="avatar-overlay">
+        <p>Awatar nieaktywny</p>
+      </div>
+      <div class="avatar-controls">
+        <button id="btn-start" class="primary">Rozpocznij wywiad z awatarem</button>
+        <button id="btn-stop" hidden>Zakończ wywiad</button>
+        <button id="btn-mic" disabled aria-pressed="false">🎙️ Mów</button>
+      </div>
+    </section>
+
+    <!-- Panel sterowania -->
+    <aside class="panel control-panel">
+      <h2>Panel sterowania</h2>
+
+      <label for="llm-select">Model AI</label>
+      <select id="llm-select"></select>
+
+      <label for="voice-select">Silnik głosu</label>
+      <select id="voice-select">
+        <option value="heygen">HeyGen native (awatar + lip-sync)</option>
+        <option value="elevenlabs">ElevenLabs (audio-only, niska latencja)</option>
+      </select>
+
+      <h2>Kontekst organizacji</h2>
+      <input type="file" id="context-file" accept=".pdf,.docx,.txt,.md" />
+      <textarea id="context-manual" rows="4" placeholder="Albo wpisz opis organizacji ręcznie…"></textarea>
+      <div class="row">
+        <button id="btn-context-send">Dodaj do kontekstu</button>
+        <button id="btn-context-reset" class="subtle">Wyczyść</button>
+      </div>
+      <p class="hint" id="context-status">Kontekst: pusty</p>
+
+      <h2>Specyfikacja PIM</h2>
+      <button id="btn-export" disabled>Generuj specyfikację (.md / .json / .docx)</button>
+      <div id="export-links" class="export-links"></div>
+    </aside>
+
+    <!-- Transkrypt -->
+    <section class="panel transcript-panel">
+      <h2>Zapis wywiadu</h2>
+      <div id="transcript" class="transcript" aria-live="polite"></div>
+      <form id="text-form" class="text-form">
+        <input type="text" id="text-input" placeholder="Napisz zamiast mówić…" maxlength="4000" autocomplete="off" />
+        <button type="submit">Wyślij</button>
+      </form>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "virtual-analyst",
+  "version": "1.0.0",
+  "description": "Wirtualny Analityk IT / Architekt PIM — wywiady analityczne na żywo z awatarem (MDA/PIM, BCE, ISO 19510, ISO 29148)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@google/genai": "^2.14.0",
+    "docx": "^9.0.0",
+    "dotenv": "^16.4.0",
+    "express": "^4.21.0",
+    "mammoth": "^1.8.0",
+    "markdown-it": "^14.1.0",
+    "multer": "^1.4.5-lts.1",
+    "openai": "^7.1.0",
+    "pdf-parse": "^1.1.1",
+    "ws": "^8.18.0"
+  }
+}

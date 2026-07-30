@@ -1,0 +1,17 @@
+{
+  "specificationSections": [
+    "Metadane i Słownik Pojęć (SBVR)",
+    "Model Obiektowy BCE (Boundary, Control, Entity)",
+    "Cykl Życia Dokumentów Cyfrowych (State Machines)",
+    "Specyfikacja Procesów BPMN 2.0 (ISO 19510)",
+    "Rejestr Wymagań (ISO 29148: REQ-BUS, REQ-FUNC, REQ-NFR)",
+    "Rekomendacje Architektoniczne i Audit-Readiness dla Systemów Legacy"
+  ],
+  "requirementPrefixes": {
+    "business": "REQ-BUS",
+    "functional": "REQ-FUNC",
+    "nonFunctional": "REQ-NFR"
+  },
+  "documentStates": ["Projekt", "Złożony", "Weryfikowany", "Zatwierdzony", "Odrzucony", "Zarchiwizowany"],
+  "specGenerationInstruction": "Na podstawie całego przeprowadzonego wywiadu analitycznego wygeneruj kompletną specyfikację Modelu Niezależnego od Platformy (PIM) w języku polskim, w formacie Markdown. Dokument MUSI zawierać dokładnie następujące sekcje (nagłówki poziomu 2):\n\n## 1. Metadane i Słownik Pojęć (SBVR)\nTabela pojęć dziedzinowych: Pojęcie | Definicja SBVR | Synonimy.\n\n## 2. Model Obiektowy BCE\nTabela klas podzielona na warstwy Boundary / Control / Entity: Warstwa | Klasa | Odpowiedzialność | Powiązania. Dodaj diagram klas w Mermaid (classDiagram).\n\n## 3. Cykl Życia Dokumentów Cyfrowych (Maszyny Stanów)\nDla każdego zidentyfikowanego dokumentu: tabela stanów i dozwolonych przejść (Stan początkowy | Zdarzenie | Warunek/Uprawnienie | Stan końcowy) oraz diagram Mermaid (stateDiagram-v2).\n\n## 4. Specyfikacja Procesów BPMN 2.0 (ISO/IEC 19510)\nOpis przepływów: zdarzenia, bramki decyzyjne, tory/pule; powiązanie kroków procesu ze zmianami stanów dokumentów. Dodaj diagram Mermaid (flowchart) odzwierciedlający logikę BPMN.\n\n## 5. Rejestr Wymagań (ISO/IEC/IEEE 29148)\nTabela wymagań z identyfikatorami REQ-BUS-xxx, REQ-FUNC-xxx, REQ-NFR-xxx: ID | Treść (składnia: 'System/Interesariusz ... musi/powinien ...') | Priorytet | Źródło (fragment wywiadu) | Powiązane obiekty BCE. Na końcu macierz śledzoności: Wymaganie | Proces BPMN | Obiekt BCE | Stan dokumentu.\n\n## 6. Rekomendacje Architektoniczne i Audit-Readiness (Legacy)\nZidentyfikowane punkty styku z systemami legacy, rekomendowane wzorce integracyjne (np. kolejki asynchroniczne, ACL/antykorupcyjna warstwa pośrednia), luki i ryzyka audytowe.\n\nZasady: nie wymyślaj faktów nieobecnych w wywiadzie — braki oznaczaj jako [DO USTALENIA]. Utrzymuj separację PIM od PSM (żadnych decyzji technologicznych poza sekcją rekomendacji). Zwróć wyłącznie dokument Markdown, bez komentarzy przed ani po."
+}
