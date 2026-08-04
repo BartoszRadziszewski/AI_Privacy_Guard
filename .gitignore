@@ -43,3 +43,6 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# Exception: template env file for virtual-analyst (no secrets inside)
+!virtual-analyst/.env.example
