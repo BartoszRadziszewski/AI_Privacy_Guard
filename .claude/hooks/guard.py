@@ -13,8 +13,16 @@ Model: speakleash/Bielik-Guard-0.1B-v1.1
 Labels: crime, hate, self-harm, sex, vulgar
 
 Environment variables:
-  PII_ANONYMIZER_PATH   Path to directory or file containing pii_anonymizer.py
-                        If not set, anonymization is skipped (prompt still classified).
+  PII_ANONYMIZER_PATH     Path to directory or file containing pii_anonymizer.py
+  BIELIK_GUARD_PII_MODE   "block" (default) | "warn"
+                          block: prompt z PII jest blokowany, a uzytkownik dostaje
+                                 zanonimizowana wersje do ponownego wyslania
+                          warn:  prompt przechodzi bez zmian, uzytkownik widzi ostrzezenie
+  BIELIK_GUARD_BYPASS  "1" = awaryjny fail-open (stare zachowanie); domyslnie fail-closed
+
+Uwaga: UserPromptSubmit NIE moze podmienic tresci promptu (dokumentacja hookow
+Claude Code: "can't replace the prompt; it only injects additionalContext").
+Dawny wynik {"decision": "modify"} byl ignorowany - prompt z PII trafial do Claude.
 """
 
 import sys
@@ -36,7 +44,98 @@ LABEL_PL = {
 }
 
 DEFAULT_THRESHOLD = 0.5
+FAIL_OPEN = os.environ.get("BIELIK_GUARD_BYPASS", "").strip() == "1"
+PII_MODE = os.environ.get("BIELIK_GUARD_PII_MODE", "block").strip().lower()
+
+
+def log_bypass(component: str, detail: str):
+    """Rejestruje uzycie furtki BIELIK_GUARD_BYPASS (EVENTLOG). Blad zapisu nie blokuje -
+    furtka jest awaryjna - ale trafia na stderr."""
+    try:
+        import subprocess
+        js = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log-event.js")
+        event = {
+            "type": "guard.bypass", "object": component, "result": "success", "severity": "high",
+            "reason": f"BIELIK_GUARD_BYPASS=1: przepuszczono mimo bledu ({str(detail)[:200]})",
+        }
+        proc = subprocess.run(["node", js, "append"], input=json.dumps(event, ensure_ascii=False).encode("utf-8"),
+                              capture_output=True, timeout=10)
+        if proc.returncode != 0:
+            raise RuntimeError(proc.stderr.decode("utf-8", "replace").strip())
+    except Exception as e:  # noqa: BLE001
+        print(f"[Bielik-Guard] Nie zapisano uzycia BIELIK_GUARD_BYPASS w rejestrze: {e}", file=sys.stderr)
+
+
+# Decyzja uzytkownika per prompt: prompt zaczynajacy sie od znacznika jest przepuszczany
+# mimo wykrytych PII (decyzja trafia do rejestru, bez wartosci PII).
+OVERRIDE_MARKER = "[PII-OK]"
+GOVERNANCE_FILE = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "config", "governance.json",
+)
+
+
+def append_event(event: dict) -> bool:
+    """Dopisuje zdarzenie do rejestru przez log-event.js. Zwraca True przy sukcesie."""
+    try:
+        import subprocess
+        js = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log-event.js")
+        proc = subprocess.run(["node", js, "append"], input=json.dumps(event, ensure_ascii=False).encode("utf-8"),
+                              capture_output=True, timeout=10)
+        if proc.returncode != 0:
+            raise RuntimeError(proc.stderr.decode("utf-8", "replace").strip())
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"[Bielik-Guard] Nie zapisano zdarzenia w rejestrze: {e}", file=sys.stderr)
+        return False
+
+
+def load_allow_patterns() -> list:
+    """Wzorce wartosci dozwolonych (np. wlasne adresy): config/governance.json -> outbound.allow_value_patterns
+    plus plik lokalny spoza repo wskazany w zmiennej BIELIK_GUARD_LOCAL_ALLOWLIST (wzorce sa laczone)."""
+    import re
+    try:
+        with open(GOVERNANCE_FILE, encoding="utf-8") as f:
+            cfg = json.load(f).get("outbound", {})
+    except FileNotFoundError:
+        return []
+    patterns = list(cfg.get("allow_value_patterns", []))
+    local_path = os.environ.get("BIELIK_GUARD_LOCAL_ALLOWLIST", "").strip()
+    if local_path:
+        try:
+            with open(local_path, encoding="utf-8") as f:
+                patterns += json.load(f).get("allow_value_patterns", [])
+        except FileNotFoundError:
+            print(f"[PII-Filter] Brak pliku lokalnego allowlisty: {local_path}", file=sys.stderr)
+    return [re.compile(p, re.IGNORECASE) for p in patterns]
+
+
+def mask_allowed(text: str, patterns: list) -> str:
+    """Zastepuje dozwolone wartosci neutralnym tekstem, zeby anonimizator ich nie liczyl jako PII."""
+    for p in patterns:
+        text = p.sub("ALLOWED_VALUE", text)
+    return text
+
+
 ALWAYS_BLOCK = {"crime", "hate", "self-harm"}
+
+
+def get_labels(model) -> list:
+    """
+    Zwraca etykiety w kolejności zgodnej z indeksami wyjść modelu
+    (model.config.id2label). Fallback na stałą LABELS, gdy id2label
+    jest puste lub niekompletne (liczba etykiet się nie zgadza).
+    """
+    id2label = getattr(model.config, "id2label", None) or {}
+    if len(id2label) == len(LABELS):
+        try:
+            return [id2label[i] for i in range(len(id2label))]
+        except KeyError:
+            try:
+                return [id2label[str(i)] for i in range(len(id2label))]
+            except KeyError:
+                return LABELS
+    return LABELS
 
 
 def load_model(model_path: str):
@@ -55,7 +154,8 @@ def classify(text: str, tokenizer, model, torch, threshold: float):
         outputs = model(**inputs)
         probs = torch.sigmoid(outputs.logits)[0]
 
-    scores = {label: round(prob.item(), 3) for label, prob in zip(LABELS, probs)}
+    labels = get_labels(model)
+    scores = {label: round(prob.item(), 3) for label, prob in zip(labels, probs)}
 
     flagged = [
         label for label, score in scores.items()
@@ -66,11 +166,37 @@ def classify(text: str, tokenizer, model, torch, threshold: float):
 
 def build_block_message(flagged: list, scores: dict) -> str:
     flagged_pl = [f"{LABEL_PL.get(f, f)} ({scores[f]:.0%})" for f in flagged]
+    if all(f in GUARD_OVERRIDABLE for f in flagged):
+        hint = (f"Zmien tresc promptu albo - jesli to falszywy alarm - wyslij go ponownie z {GUARD_MARKER} "
+                f"na poczatku (decyzja trafi do rejestru).")
+    else:
+        hint = "Zmien tresc promptu i sprobuj ponownie (tej kategorii nie mozna pominac)."
     return (
         f"[Bielik-Guard] Prompt zablokowany.\n"
         f"Wykryte kategorie: {', '.join(flagged_pl)}.\n"
-        f"Zmien tresc promptu i sprobuj ponownie."
+        f"{hint}"
     )
+
+
+# Decyzja uzytkownika per prompt dla falszywych alarmow moderacji. Mowa nienawisci
+# i samookaleczenie sa blokowane zawsze, bez mozliwosci pominiecia.
+GUARD_MARKER = "[GUARD-OK]"
+GUARD_OVERRIDABLE = {"crime", "sex", "vulgar"}
+
+
+def split_markers(text: str):
+    """Zdejmuje znaczniki decyzji z poczatku promptu (dowolna kolejnosc). Zwraca (zbior_znacznikow, reszta)."""
+    markers = set()
+    rest = text.lstrip()
+    changed = True
+    while changed:
+        changed = False
+        for m in (GUARD_MARKER, OVERRIDE_MARKER):
+            if rest.startswith(m):
+                markers.add(m)
+                rest = rest[len(m):].lstrip()
+                changed = True
+    return markers, rest
 
 
 def _find_anonymizer_dir():
@@ -99,8 +225,8 @@ def _find_anonymizer_dir():
     return None
 
 
-def anonymize_prompt(text: str) -> str:
-    """Anonymizes PII in prompt text. Returns original text on any error (fail-open)."""
+def anonymize_prompt(text: str):
+    """Anonymizes PII in prompt text. Returns cleaned text, or None on error (fail-closed)."""
     try:
         anon_dir = _find_anonymizer_dir()
         if anon_dir is None:
@@ -109,7 +235,7 @@ def anonymize_prompt(text: str) -> str:
                 "Set PII_ANONYMIZER_PATH to enable anonymization.",
                 file=sys.stderr,
             )
-            return text
+            return None
 
         if anon_dir not in sys.path:
             sys.path.insert(0, anon_dir)
@@ -122,17 +248,28 @@ def anonymize_prompt(text: str) -> str:
         return cleaned
     except Exception as e:
         print(f"[PII-Filter] Anonymization error: {e}", file=sys.stderr)
-        return text
+        return None
+
+
+def emit_block(reason: str):
+    print(json.dumps({"decision": "block", "reason": reason}, ensure_ascii=False))
+    sys.exit(0)
 
 
 def run_hook_mode(threshold: float, model_path: str):
     """Claude Code hook mode — reads JSON from stdin, writes JSON decision to stdout."""
     try:
-        data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        sys.exit(0)
+        data = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError) as e:
+        if FAIL_OPEN:
+            log_bypass("guard.py:input", e)
+            sys.exit(0)
+        emit_block(f"[Bielik-Guard] Nie udalo sie odczytac promptu ({e}). Blokada (fail-closed).")
 
     text = data.get("prompt", "").strip()
+    if not text:
+        sys.exit(0)
+    markers, text = split_markers(text)
     if not text:
         sys.exit(0)
 
@@ -141,20 +278,73 @@ def run_hook_mode(threshold: float, model_path: str):
         scores, flagged = classify(text, tokenizer, model, torch, threshold)
     except Exception as e:
         print(f"[Bielik-Guard] Model error: {e}", file=sys.stderr)
-        sys.exit(0)
+        if FAIL_OPEN:
+            log_bypass("guard.py:model", e)
+            sys.exit(0)
+        emit_block(
+            f"[Bielik-Guard] Model moderacji niedostepny ({e}). Prompt zablokowany (fail-closed).\n"
+            f"Awaryjnie: ustaw BIELIK_GUARD_BYPASS=1 i uruchom Claude Code ponownie."
+        )
 
     if flagged:
-        result = {
-            "decision": "block",
-            "reason": build_block_message(flagged, scores),
-        }
-        print(json.dumps(result, ensure_ascii=False))
-        sys.exit(0)
+        if GUARD_MARKER in markers and all(f in GUARD_OVERRIDABLE for f in flagged):
+            if not append_event({
+                "type": "guard.moderation_override", "object": "UserPromptSubmit", "result": "success",
+                "severity": "medium", "consent": f"uzytkownik: znacznik {GUARD_MARKER} w prompcie",
+                "reason": "Falszywy alarm moderacji pominiety decyzja uzytkownika: "
+                          + ", ".join(f"{f} {scores[f]:.0%}" for f in flagged),
+            }):
+                emit_block(f"[Bielik-Guard] Nie udalo sie zapisac decyzji {GUARD_MARKER} w rejestrze - prompt zablokowany (fail-closed).")
+        else:
+            append_event({
+                "type": "guard.moderation_blocked", "object": "UserPromptSubmit", "result": "deny", "severity": "low",
+                "reason": "Moderacja: " + ", ".join(f"{f} {scores[f]:.0%}" for f in flagged),
+            })
+            emit_block(build_block_message(flagged, scores))
 
-    cleaned = anonymize_prompt(text)
-    if cleaned != text:
-        result = {"decision": "modify", "prompt": cleaned}
-        print(json.dumps(result, ensure_ascii=False))
+    override = OVERRIDE_MARKER in markers
+
+    try:
+        allow = load_allow_patterns()
+    except Exception as e:  # noqa: BLE001
+        if FAIL_OPEN:
+            log_bypass("guard.py:allowlist", e)
+            sys.exit(0)
+        emit_block(f"[PII-Filter] Nie mozna wczytac config/governance.json ({e}) - prompt zablokowany (fail-closed).")
+
+    masked = mask_allowed(text, allow)
+    cleaned_masked = anonymize_prompt(masked)
+    if cleaned_masked is None:
+        if FAIL_OPEN:
+            log_bypass("guard.py:anonymizer", "anonimizator niedostepny")
+            sys.exit(0)
+        emit_block("[PII-Filter] Anonimizator niedostepny - prompt zablokowany (fail-closed).")
+
+    if cleaned_masked != masked:
+        if override:
+            if not append_event({
+                "type": "pii.prompt_override", "object": "UserPromptSubmit", "result": "success",
+                "severity": "medium", "consent": "uzytkownik: znacznik [PII-OK] w prompcie",
+                "reason": "Prompt z PII wyslany jawnie decyzja uzytkownika",
+            }):
+                emit_block("[PII-Filter] Nie udalo sie zapisac decyzji [PII-OK] w rejestrze - prompt zablokowany (fail-closed).")
+            print(json.dumps({"systemMessage": "[PII-Filter] Prompt z danymi osobowymi wyslany jawnie (Twoja decyzja [PII-OK], zapisana w rejestrze)."}, ensure_ascii=False))
+            sys.exit(0)
+        if PII_MODE == "warn":
+            print(json.dumps({"systemMessage": "[PII-Filter] Prompt zawiera dane osobowe i zostal wyslany BEZ anonimizacji (tryb warn)."}, ensure_ascii=False))
+            sys.exit(0)
+        append_event({
+            "type": "pii.prompt_blocked", "object": "UserPromptSubmit", "result": "deny",
+            "severity": "low", "reason": "Prompt z PII zablokowany, zaproponowano wersje zanonimizowana",
+        })
+        cleaned = anonymize_prompt(text) or cleaned_masked
+        emit_block(
+            "[PII-Filter] Prompt zawiera dane osobowe i nie zostal wyslany do Claude.\n"
+            "Masz dwie mozliwosci:\n"
+            "  1) wyslij ponownie wersje zanonimizowana (ponizej), albo\n"
+            f"  2) wyslij oryginal z {OVERRIDE_MARKER} na poczatku - przejdzie jawnie, decyzja trafi do rejestru.\n\n"
+            f"{cleaned}"
+        )
 
     sys.exit(0)
 
@@ -170,11 +360,13 @@ def run_cli_mode(text: str, threshold: float, model_path: str):
 
     scores, flagged = classify(text, tokenizer, model, torch, threshold)
 
+    labels = get_labels(model)
+
     print(f"\nText: {text[:120]}{'...' if len(text) > 120 else ''}")
     print(f"Threshold: {threshold:.0%}\n")
     print(f"{'Label':<15} {'Score':>7}  {'Status'}")
     print("-" * 36)
-    for label in LABELS:
+    for label in labels:
         score = scores[label]
         status = "FLAGGED" if label in flagged else "OK"
         print(f"{label:<15} {score:>6.1%}  {status}")

@@ -1,6 +1,14 @@
 {
-  "intercepted_tools": ["Read", "Grep"],
-
+  "intercepted_tools": [
+    "Read",
+    "Grep"
+  ],
+  "always_block_patterns": [
+    "(token|key|auth|secret|password|pass|haslo|klucz).*\\.txt$",
+    "\\.pem$",
+    "\\.p12$",
+    "\\.pfx$"
+  ],
   "path_patterns": [
     "\\.env$",
     "token.*\\.txt$",
@@ -21,22 +29,78 @@
     "baza.*klientow",
     "baza.*pracownikow",
     "kartoteka",
-    "ewidencj"
+    "ewidencj",
+    "notatki",
+    "notes",
+    "materialy",
+    "materiały",
+    "materials",
+    "correspondence",
+    "harmonogra",
+    "schedule",
+    "analiz",
+    "analys",
+    "raport",
+    "report",
+    "proces",
+    "process",
+    "prezentacj",
+    "presentation",
+    "przetarg",
+    "auction",
+    "tender",
+    "prompt",
+    "wymagani",
+    "requirement",
+    "dane",
+    "data",
+    "decyzj",
+    "decision",
+    "obszar",
+    "/area",
+    "coach",
+    "mentor",
+    "zapis",
+    "save",
+    "pyta",
+    "question",
+    "archiwu",
+    "archiv",
+    "dokument",
+    "document",
+    "\\.xlsx$",
+    "\\.xls$",
+    "\\.pdf$",
+    "\\.docx$",
+    "\\.doc$"
   ],
-
   "content_peek_patterns": [
     "@[\\w.-]+\\.[a-z]{2,}",
     "\\+48[\\d \\-]{9,}",
     "\\b\\d{10,11}\\b"
   ],
-
   "binary_extensions": [
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx",
-    ".ppt", ".pptx", ".odt", ".ods", ".odp"
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".odt",
+    ".ods",
+    ".odp"
   ],
-
   "text_extensions_with_peek": [
-    ".txt", ".csv", ".xml", ".json", ".md",
-    ".log", ".eml", ".msg", ".html", ".htm"
+    ".txt",
+    ".csv",
+    ".xml",
+    ".json",
+    ".md",
+    ".log",
+    ".eml",
+    ".msg",
+    ".html",
+    ".htm"
   ]
 }

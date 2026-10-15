@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/guard.py",
+            "command": "venv/Scripts/python.exe .claude/hooks/guard.py",
             "timeout": 30,
             "statusMessage": "Bielik-Guard: checking prompt..."
           }
@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pre_tool_hook.py",
+            "command": "venv/Scripts/python.exe .claude/hooks/pre_tool_hook.py",
             "timeout": 15,
             "statusMessage": "PII-Guard: checking file..."
           }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python .claude/hooks/pre_tool_hook.py",
+            "command": "venv/Scripts/python.exe .claude/hooks/pre_tool_hook.py",
             "timeout": 10,
             "statusMessage": "PII-Guard: checking search path..."
           }

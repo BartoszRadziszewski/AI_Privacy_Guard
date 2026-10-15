@@ -43,3 +43,12 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# Rejestr zdarzeń EVENTLOG (ścieżki projektów klientów – nie do repo)
+logs/
+
+# Propozycje zmian do zatwierdzenia (tymczasowe)
+propozycje/
+
+# Katalog przygotowania publikacji (klon repo do sprawdzenia przed pushem)
+publikacja/

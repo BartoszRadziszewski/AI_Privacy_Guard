@@ -1,0 +1,35 @@
+{
+  "_comment": "Konfiguracja hooków RPDL/DLPP/EVENTLOG (backup_hook.js, outbound_pii_hook.py, log-event.js). Edytowalna bez zmian w kodzie.",
+  "default_confidentiality": "nieokreślony",
+  "_comment_confidentiality": "Klucz = prefiks katalogu projektu (część nazwy przed pierwszą kropką lub podkreśleniem, np. acme, contoso). Uzupełnij poziomy poufności.",
+  "confidentiality_by_client": {},
+  "backup": {
+    "archive_dir_name": "archiwum",
+    "max_file_mb": 200,
+    "_comment_exclude": "Fragmenty ścieżek (po normalizacji do / i małych liter), dla których hook nie robi kopii ani wpisu.",
+    "exclude_path_fragments": [
+      "/archiwum/",
+      "/node_modules/",
+      "/.git/",
+      "/venv/",
+      "/__pycache__/",
+      "/appdata/local/temp/",
+      "/appdata/roaming/claude/side-session-notes/",
+      "/.claude/projects/",
+      "/ai_privacy_guard/logs/"
+    ]
+  },
+  "outbound": {
+    "_comment_trusted": "Prefiksy narzędzi MCP traktowanych jako środowisko zaufane (bez skanu). Dopisz tylko serwery lokalne.",
+    "trusted_mcp_prefixes": [
+      "mcp__ccd_",
+      "mcp__terminal__",
+      "mcp__visualize__"
+    ],
+    "_comment_allow": "Wyrażenia regularne dla wartości, które nie są traktowane jako PII (np. Twój własny adres lub domena firmowa). Domyślnie puste.",
+    "allow_value_patterns": [],
+    "_comment_local": "Wlasne adresy i inne wartosci prywatne trzymaj w pliku lokalnym spoza repo; sciezke podaj w zmiennej srodowiskowej BIELIK_GUARD_LOCAL_ALLOWLIST (np. w ~/.claude/settings.json -> env). Wzorce sa laczone.",
+    "max_git_diff_mb": 20
+  },
+  "_comment_paths": "Sciezki lokalne podawaj w zmiennych srodowiskowych: EVENT_LOG_PATH (domyslnie logs/events.jsonl w repo), BIELIK_GUARD_PROJECTS_ROOT (katalog projektow do etykiety klienta), BIELIK_GUARD_LOCAL_ALLOWLIST."
+}

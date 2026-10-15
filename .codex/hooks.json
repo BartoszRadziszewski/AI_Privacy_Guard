@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "venv/Scripts/python.exe .codex/hooks/pre_tool_hook.py",
+            "timeout": 15,
+            "statusMessage": "PII-Guard: checking file..."
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "venv/Scripts/python.exe .codex/hooks/pre_tool_hook.py",
+            "timeout": 15,
+            "statusMessage": "PII-Guard: checking search path..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "venv/Scripts/python.exe .codex/hooks/guard.py",
+            "timeout": 30,
+            "statusMessage": "Bielik-Guard: checking prompt..."
+          }
+        ]
+      }
+    ]
+  }
+}
