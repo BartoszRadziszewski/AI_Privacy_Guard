@@ -53,10 +53,16 @@ log-event.js → logs/events.jsonl (append-only, SHA-256 hash chain)
 
 ## Requirements
 
-- Windows 10/11
-- Python 3.10+ (venv with `transformers`, `torch`)
+- Python 3.10+ (venv with `transformers`, `torch`; the CPU build of torch is enough)
 - Node.js 18+ (backup hook and event log)
-- [Claude Code](https://claude.ai/code) (desktop or CLI)
+- [Claude Code](https://code.claude.com/docs/en/setup) (desktop or CLI; needs a Pro, Max, Team or Enterprise plan)
+- Windows 10/11 is the tested platform (`scripts\install.bat`, hook commands use `venv\Scripts\python.exe`).
+  macOS/Linux: run `scripts/install.sh` and change the interpreter path in hook commands to `venv/bin/python`
+  (see [Hook registration](#hook-registration)). With the Windows path on macOS/Linux the fail-closed guard
+  blocks every prompt.
+
+> **No model, no torch needed for the demo.** `demo/separacja.py` runs on the standard library plus
+> `.claude/hooks/pii_anonymizer.py` on any OS. Start there: [demo/README.md](demo/README.md).
 
 ## Quick Start
 
@@ -66,7 +72,19 @@ cd AI_Privacy_Guard
 scripts\install.bat
 ```
 
-`install.bat` creates a Python venv and installs dependencies. The project-level
+macOS/Linux:
+
+```bash
+git clone https://github.com/BartoszRadziszewski/AI_Privacy_Guard.git
+cd AI_Privacy_Guard
+bash scripts/install.sh
+```
+
+The installers create a Python venv and install dependencies. The CPU build of torch
+(~200 MB) is enough; on Linux a plain `pip install torch` pulls the CUDA build (2 GB+), so the
+installer and `requirements.txt` use `--index-url https://download.pytorch.org/whl/cpu`.
+If you install by hand: `pip install torch --index-url https://download.pytorch.org/whl/cpu`,
+then `pip install transformers`. The project-level
 `.claude/settings.json` (and `.codex/hooks.json` for Codex) runs the prompt and file
 guards with the venv interpreter when you work inside this repo. To protect all your
 projects, register the hooks globally — see [Hook registration](#hook-registration).
@@ -77,7 +95,8 @@ projects, register the hooks globally — see [Hook registration](#hook-registra
 
 ## Hook registration
 
-Example entries for `~/.claude/settings.json` (replace `<repo>` with your clone path):
+Example entries for `~/.claude/settings.json` (replace `<repo>` with your clone path;
+on macOS/Linux replace `<repo>/venv/Scripts/python.exe` with `<repo>/venv/bin/python`):
 
 ```json
 {
@@ -98,6 +117,23 @@ Example entries for `~/.claude/settings.json` (replace `<repo>` with your clone 
 
 `destructive_cmd_hook.js` (backup before `rm`, `mv`, `Remove-Item`, `>` …) is included
 but optional; register it with matcher `^(Bash|PowerShell)$` if you want it.
+
+## Demo: data separation before sending to a model
+
+`demo/` holds a synthetic data set (invoices, a dunning e-mail, board minutes, a contract
+fragment, a prompt) before and after separation, the script `separacja.py` (minimisation →
+PII tokens with checksum validation → business secrets list → amount buckets), an optional
+Presidio/spaCy variant of `pii_anonymizer.py` that the hooks pick up through
+`PII_ANONYMIZER_PATH`, and `METODA.md` describing the method. Works without the model and
+without Claude Code:
+
+```bash
+cd demo
+python separacja.py --in przed --out po
+python separacja.py --in przed --out po_przedzialy --kwoty=przedzialy
+```
+
+Details and the live-demo script: [demo/README.md](demo/README.md).
 
 ## Configuration
 
@@ -180,8 +216,10 @@ AI_Privacy_Guard/
 ├── config/
 │   ├── sensitive_patterns.json
 │   └── governance.json
+├── demo/                       # synthetic data, separacja.py, Presidio variant, METODA.md
 ├── scripts/
-│   ├── install.bat
+│   ├── install.bat             # Windows
+│   ├── install.sh              # macOS / Linux
 │   └── review-event-log.js
 ├── CLAUDE.md
 ├── requirements.txt
@@ -216,7 +254,7 @@ echo {"tool_name":"Read","tool_input":{"file_path":"C:\\docs\\kontakty.xlsx"}} |
 - A hook **timeout** still lets the action through (Claude Code before `onFailure: "block"` support); fail-closed covers errors inside the scripts.
 - The event log records the intent before an action, not the result after it (no `PostToolUse` hook yet).
 - The regex anonymizer treats any 9-digit number as a phone number (false positives on invoice or order numbers); PESEL, NIP, IBAN and names in free text are only partly detected.
-- Windows-only paths; the model loads on every prompt (~3–5 s).
+- Hook commands in `.claude/settings.json` use Windows venv paths; on macOS/Linux edit them to `venv/bin/python`. The model loads on every prompt (~3–5 s).
 - Binary files (PDF, DOCX…) are blocked at path level — content is not parsed.
 
 ## License
