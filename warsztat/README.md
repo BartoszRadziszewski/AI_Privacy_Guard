@@ -8,12 +8,12 @@ AI Summer Academy 2026, tydzień 6, czwartek 12.11.2026, 18:00–19:30.
 |---|---|
 | [AI_Risk_Governance_Canvas_Demo.docx](AI_Risk_Governance_Canvas_Demo.docx) | wzór Canvasa do wypełnienia przez zespół (Word) |
 | [AI_Risk_Governance_Canvas_Demo.md](AI_Risk_Governance_Canvas_Demo.md) | ten sam wzór do czytania w przeglądarce |
-| [../demo/](../demo/) | dane demo (syntetyczne), skrypt separacji, opis metody |
+| [demo/](demo/) | dane demo (syntetyczne), skrypt separacji, opis metody |
 
 ## Ćwiczenie bez instalacji (5 minut, także na telefonie)
 
 1. Otwórz https://bartoszradziszewski.github.io/anonimizator/ i zakładkę **Tekst**.
-2. Wklej treść pliku [`demo/przed/notatka_zarzad_poufne.md`](../demo/przed/notatka_zarzad_poufne.md).
+2. Wklej treść pliku [`demo/przed/notatka_zarzad_poufne.md`](demo/przed/notatka_zarzad_poufne.md).
 3. Policz wykrycia. Znajdź w kluczu pseudonimizacji osobę, która dostała dwie etykiety.
 4. Dopisz „Sokół” i „Lex-Demo” do pola **Własne frazy**, włącz kategorię **Kwoty**. Porównaj wynik.
 5. Skopiuj „wersję bezpieczną”. To, czego narzędzie nie wykryło, to materiał do sekcji MAP w Canvasie.
