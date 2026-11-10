@@ -25,6 +25,18 @@ demo/
 └── METODA.md                     # opis metody: co usuwamy, co pseudonimizujemy, co agregujemy
 ```
 
+## Wersja bez instalacji (przeglądarka, 5 minut)
+
+Ten sam mechanizm warstwy 1 (PII z walidacją sum kontrolnych, dodatkowo adresy, kody pocztowe,
+nazwy spółek) i warstwy 2 (własne frazy) działa w przeglądarce, bez wysyłania danych na serwer:
+**https://bartoszradziszewski.github.io/anonimizator/** (repo:
+[BartoszRadziszewski/anonimizator](https://github.com/BartoszRadziszewski/anonimizator)).
+
+Ćwiczenie na warsztat: otwórz zakładkę „Tekst”, wklej `przed/notatka_zarzad_poufne.md`, zobacz
+9 wykrytych danych, potem dopisz „Sokół” i „Lex-Demo” do pola „Własne frazy” i włącz kategorię
+„Kwoty”. Skopiuj „wersję bezpieczną”, wyeksportuj klucz sesji (CSV). To, co zostało niewykryte,
+to materiał do dyskusji o warstwie 0 (minimalizacja).
+
 ## Uruchomienie (2 minuty)
 
 ```bash
