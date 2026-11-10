@@ -33,7 +33,7 @@ nazwy spółek) i warstwy 2 (własne frazy) działa w przeglądarce, bez wysyła
 [BartoszRadziszewski/anonimizator](https://github.com/BartoszRadziszewski/anonimizator)).
 
 Ćwiczenie na warsztat: otwórz zakładkę „Tekst”, wklej `przed/notatka_zarzad_poufne.md`, zobacz
-9 wykrytych danych, potem dopisz „Sokół” i „Lex-Demo” do pola „Własne frazy” i włącz kategorię
+12 wykrytych danych (sprawdź w kluczu, że „Monika Wójcik” i „Moniki Wójcik” dostały dwie etykiety), potem dopisz „Sokół” i „Lex-Demo” do pola „Własne frazy” i włącz kategorię
 „Kwoty”. Skopiuj „wersję bezpieczną”, wyeksportuj klucz sesji (CSV). To, co zostało niewykryte,
 to materiał do dyskusji o warstwie 0 (minimalizacja).
 
