@@ -8,6 +8,8 @@ AI Summer Academy 2026, tydzień 6, czwartek 12.11.2026, 18:00–19:30.
 |---|---|
 | [AI_Risk_Governance_Canvas_Demo.docx](AI_Risk_Governance_Canvas_Demo.docx) | wzór Canvasa do wypełnienia przez zespół (Word) |
 | [AI_Risk_Governance_Canvas_Demo.md](AI_Risk_Governance_Canvas_Demo.md) | ten sam wzór do czytania w przeglądarce |
+| [AI_Risk_Governance_Canvas_przyklad_wypelniony.docx](AI_Risk_Governance_Canvas_przyklad_wypelniony.docx) | przykład wypełnionego Canvasa: asystent produkcji filmowej „Klaps” (nazwy, liczby i osoby przykładowe) |
+| [AI_Risk_Governance_Canvas_przyklad_wypelniony.md](AI_Risk_Governance_Canvas_przyklad_wypelniony.md) | ten sam przykład do czytania w przeglądarce |
 | [demo/](demo/) | dane demo (syntetyczne), skrypt separacji, opis metody |
 
 ## Ćwiczenie bez instalacji (5 minut, także na telefonie)
