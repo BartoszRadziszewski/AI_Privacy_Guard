@@ -52,3 +52,7 @@ propozycje/
 
 # Katalog przygotowania publikacji (klon repo do sprawdzenia przed pushem)
 publikacja/
+
+# Demo: the session key maps tokens back to values and must stay local
+demo/klucz_sesji.csv
+demo/presidio/__pycache__/

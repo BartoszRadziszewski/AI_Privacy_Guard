@@ -1,0 +1,19 @@
+nr_faktury;kontrahent;NIP;osoba_kontaktowa;email;telefon;rachunek_bankowy;kwota_brutto_PLN;termin_platnosci;dni_po_terminie;status;uwagi
+FV/2026/0001;[FIRMA_1];[NIP_3];[OSOBA_8];[EMAIL_5];[TEL_4];[NRB_1];74494.54;2026-11-18;34;przeterminowana;faktura korygująca, spór o 12 400 zł
+FV/2026/0002;[FIRMA_1];[NIP_3];[OSOBA_8];[EMAIL_5];[TEL_4];[NRB_1];22603.13;2026-11-26;61;przeterminowana;ugoda ratalna, rabat 7% poza cennikiem
+FV/2026/0003;[FIRMA_4];[NIP_4];[OSOBA_12];[EMAIL_3];[TEL_5];[NRB_3];7285.48;2026-11-20;34;przeterminowana;faktura korygująca, spór o 12 400 zł
+FV/2026/0004;[FIRMA_4];[NIP_4];[OSOBA_12];[EMAIL_3];[TEL_5];[NRB_3];97306.96;2026-10-12;0;zapłacona;ugoda ratalna, rabat 7% poza cennikiem
+FV/2026/0005;[FIRMA_2] [OSOBA_13];[NIP_5];[OSOBA_13];[EMAIL_2];[TEL_1];[NRB_4];139390.95;2026-10-22;12;przeterminowana;
+FV/2026/0006;[FIRMA_2] [OSOBA_13];[NIP_5];[OSOBA_13];[EMAIL_2];[TEL_1];[NRB_4];2143.10;2026-11-19;61;przeterminowana;faktura korygująca, spór o 12 400 zł
+FV/2026/0007;[OSOBA_7] [OSOBA_4];[NIP_1];[OSOBA_4];[EMAIL_6];[TEL_3];[NRB_5];169185.28;2026-10-15;61;przeterminowana;"marża na kontrakcie 31%; nie ujawniać klientowi"
+FV/2026/0008;[OSOBA_7] [OSOBA_4];[NIP_1];[OSOBA_4];[EMAIL_6];[TEL_3];[NRB_5];149147.72;2026-09-19;61;przeterminowana;
+FV/2026/0009;[OSOBA_7] [OSOBA_4];[NIP_1];[OSOBA_4];[EMAIL_6];[TEL_3];[NRB_5];80897.07;2026-10-15;61;przeterminowana;
+FV/2026/0010;Agro-[FIRMA_7];[NIP_6];[OSOBA_10];[EMAIL_7];[TEL_6];[NRB_6];61080.07;2026-10-15;0;do zapłaty;"marża na kontrakcie 31%; nie ujawniać klientowi"
+FV/2026/0011;Agro-[FIRMA_7];[NIP_6];[OSOBA_10];[EMAIL_7];[TEL_6];[NRB_6];147635.67;2026-09-28;0;zapłacona;
+FV/2026/0012;[MIEJSCE_2];[NIP_7];[OSOBA_7];[EMAIL_4];[TEL_7];[NRB_7];109294.35;2026-09-10;12;przeterminowana;
+FV/2026/0013;[MIEJSCE_2];[NIP_7];[OSOBA_7];[EMAIL_4];[TEL_7];[NRB_7];49145.76;2026-09-01;34;przeterminowana;faktura korygująca, spór o 12 400 zł
+FV/2026/0014;[MIEJSCE_2];[NIP_7];[OSOBA_7];[EMAIL_4];[TEL_7];[NRB_7];166262.34;2026-10-14;0;zapłacona;
+FV/2026/0015;[FIRMA_7] [OSOBA_14];[NIP_8];[OSOBA_14];[EMAIL_8];[TEL_8];[NRB_8];100848.43;2026-10-07;61;przeterminowana;
+FV/2026/0016;[FIRMA_7] [OSOBA_14];[NIP_8];[OSOBA_14];[EMAIL_8];[TEL_8];[NRB_8];133844.46;2026-09-06;61;przeterminowana;
+FV/2026/0017;[FIRMA_5];[NIP_9];[OSOBA_6];[EMAIL_9];[TEL_9];[NRB_9];155509.89;2026-11-02;61;przeterminowana;faktura korygująca, spór o 12 400 zł
+FV/2026/0018;[FIRMA_5];[NIP_9];[OSOBA_6];[EMAIL_9];[TEL_9];[NRB_9];49947.95;2026-11-17;12;przeterminowana;
